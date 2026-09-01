@@ -20,3 +20,17 @@
 - **Контракты данных (SSOT):**
   - JSON-схемы для MQTT сообщений (`availability`, `lock_state`, `lock_command`, `relay_state`, `relay_command`, `valve_event`, `climate_state`, `climate_command`).
   - JSON-схемы для API сущностей (`property`, `device`, `pin`, `mqtt_auth`).
+- **Backend API & Worker (Python 3.14 + FastAPI):**
+  - Инициализация и конфигурация проекта с использованием менеджера пакетов `uv`.
+  - Автоматическая кодогенерация моделей Pydantic v2 из SSOT JSON-схем через `datamodel-code-generator`.
+  - Настройка непрерывной интеграции (CI) в GitHub Actions (линтер Ruff и тесты Pytest).
+  - Аутентификация через Supabase JWT (поддержка JWKS и симметричных ключей) с пробросом токенов в БД для строгого соблюдения RLS-политик.
+  - Изолированный доступ по ключу `service_role` только для фонового воркера и вебхуков Mosquitto.
+  - Реализация динамических HTTP Webhook эндпоинтов для `mosquitto-go-auth` (`/auth/mqtt/user`, `/auth/mqtt/superuser`, `/auth/mqtt/acl`) с валидацией прав на топики `properties/<property_id>/...`.
+  - Управление объектами (`/properties`) и IoT-устройствами (`/properties/{property_id}/devices`).
+  - Управление PIN-кодами смарт-замков (`/properties/{property_id}/locks/{device_id}/pins`) с шифрованием AES (Fernet) at rest, запретом логирования и аудитом в `audit_logs`.
+  - Эндпоинты истории телеметрии (`device_logs`) и аудита (`audit_logs`).
+  - Фоновый MQTT Worker (`paho-mqtt`) для сбора телеметрии из топиков `state`, `event`, `availability` с валидацией схем и сохранением в БД.
+  - Эндпоинт отправки команд устройствам (`/properties/{property_id}/devices/{device_id}/command`) с QoS 1 и `retain: false`.
+  - 100% покрытие юнит-тестами (26 тестов в Pytest).
+
