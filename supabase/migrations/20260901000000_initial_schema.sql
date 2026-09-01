@@ -8,12 +8,15 @@ CREATE EXTENSION IF NOT EXISTS "pg_cron";
 
 -- 2. Utility Functions
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
-    NEW.updated_at = now();
+    NEW.updated_at = pg_catalog.now();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- 3. Properties Table
 CREATE TABLE IF NOT EXISTS properties (
