@@ -13,13 +13,21 @@ services:
       - ./certs:/etc/mosquitto/certs:ro
       - mosquitto-data:/var/lib/mosquitto
       - mosquitto-log:/var/log/mosquitto
+    env_file:
+      - path: ../../.env
+        required: false
+      - path: .env
+        required: false
     environment:
       - TZ=UTC
+      - MQTT_WORKER_USERNAME=${MQTT_WORKER_USERNAME:-backend_worker}
+      - MQTT_WORKER_PASSWORD=${MQTT_WORKER_PASSWORD:-secret_backend_worker_pass}
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /etc/mosquitto/certs/ca.crt -u backend_worker -P secret_backend_worker_pass -t healthcheck -E -i healthcheck-probe || exit 0"]
+      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /etc/mosquitto/certs/ca.crt -u \"$${MQTT_WORKER_USERNAME}\" -P \"$${MQTT_WORKER_PASSWORD}\" -t healthcheck -E -i healthcheck-probe || exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
+
 
 
 
