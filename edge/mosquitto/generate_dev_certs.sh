@@ -11,13 +11,16 @@ mkdir -p "${CERTS_DIR}"
 DAYS_VALID=365
 
 # 1. Certificate Authority (CA)
-if [ ! -f "${CERTS_DIR}/ca.key" ]; then
-    echo "Creating Root CA..."
-    openssl req -new -x509 -days ${DAYS_VALID} -extensions v3_ca \
-        -keyout "${CERTS_DIR}/ca.key" -out "${CERTS_DIR}/ca.crt" \
-        -subj "/C=US/ST=Dev/L=Local/O=SmartRent/OU=IoT/CN=SmartRent-Dev-RootCA" \
-        -nodes
-fi
+echo "Creating Root CA with OpenSSL 3.x compliant extensions..."
+rm -f "${CERTS_DIR}/ca.key" "${CERTS_DIR}/ca.crt"
+openssl req -new -x509 -days ${DAYS_VALID} \
+    -keyout "${CERTS_DIR}/ca.key" -out "${CERTS_DIR}/ca.crt" \
+    -subj "/C=US/ST=Dev/L=Local/O=SmartRent/OU=IoT/CN=SmartRent-Dev-RootCA" \
+    -addext "basicConstraints=critical,CA:TRUE" \
+    -addext "keyUsage=critical,keyCertSign,cRLSign" \
+    -addext "subjectKeyIdentifier=hash" \
+    -nodes
+
 
 # 2. Server Certificate
 echo "Creating Mosquitto Server Key and CSR..."

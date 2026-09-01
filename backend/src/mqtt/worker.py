@@ -61,7 +61,7 @@ class MqttWorker:
         return self._admin_client
 
     def on_connect(self, client, userdata, flags, reason_code, properties=None):
-        if reason_code == 0:
+        if reason_code == 0 or not getattr(reason_code, "is_failure", True):
             logger.info("MQTT Worker subscribed to telemetry topics")
             client.subscribe("properties/+/+/+/state", qos=1)
             client.subscribe("properties/+/+/+/event", qos=1)

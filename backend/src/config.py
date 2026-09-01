@@ -25,8 +25,9 @@ class Settings(BaseSettings):
     # MQTT Broker Configuration
     MQTT_BROKER_HOST: str = "localhost"
     MQTT_BROKER_PORT: int = 8883
-    MQTT_TLS_ENABLED: bool = False
+    MQTT_TLS_ENABLED: bool = True
     MQTT_CA_CERT_PATH: str | None = None
+
     MQTT_CLIENT_CERT_PATH: str | None = None
     MQTT_CLIENT_KEY_PATH: str | None = None
     MQTT_WORKER_USERNAME: str = "backend_worker"

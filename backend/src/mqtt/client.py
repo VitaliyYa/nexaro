@@ -1,6 +1,8 @@
 import json
 import logging
 import ssl
+import uuid
+from pathlib import Path
 from typing import Any
 
 import paho.mqtt.client as mqtt
@@ -18,10 +20,10 @@ class MqttService:
 
     def create_client(self) -> mqtt.Client:
         # Paho MQTT Client Callback API v2 compatibility
+        unique_id = uuid.uuid4().hex[:6]
         client = mqtt.Client(
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
-            client_id=f"smartrent-backend-{self.settings.MQTT_WORKER_USERNAME}",
-            clean_session=False,
+            client_id=f"smartrent-backend-{self.settings.MQTT_WORKER_USERNAME}-{unique_id}",
         )
 
         client.username_pw_set(
@@ -31,8 +33,20 @@ class MqttService:
 
         if self.settings.MQTT_TLS_ENABLED:
             tls_context = ssl.create_default_context()
-            if self.settings.MQTT_CA_CERT_PATH:
-                tls_context.load_verify_locations(cafile=self.settings.MQTT_CA_CERT_PATH)
+            ca_path = self.settings.MQTT_CA_CERT_PATH
+            if not ca_path:
+                dev_ca = Path(__file__).resolve().parents[3] / "edge" / "mosquitto" / "certs" / "ca.crt"
+                if dev_ca.exists():
+                    ca_path = str(dev_ca)
+
+            if ca_path and Path(ca_path).exists():
+                tls_context.load_verify_locations(cafile=ca_path)
+
+            if self.settings.ENVIRONMENT == "development":
+                tls_context.check_hostname = False
+                if not ca_path or not Path(ca_path).exists():
+                    tls_context.verify_mode = ssl.CERT_NONE
+
             if self.settings.MQTT_CLIENT_CERT_PATH and self.settings.MQTT_CLIENT_KEY_PATH:
                 tls_context.load_cert_chain(
                     certfile=self.settings.MQTT_CLIENT_CERT_PATH,
@@ -45,7 +59,7 @@ class MqttService:
         return client
 
     def _on_connect(self, client, userdata, flags, reason_code, properties=None):
-        if reason_code == 0:
+        if reason_code == 0 or not getattr(reason_code, "is_failure", True):
             self._connected = True
             logger.info(
                 "Connected to MQTT Broker (%s:%s)",

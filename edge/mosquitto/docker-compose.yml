@@ -6,18 +6,21 @@ services:
     ports:
       - "8883:8883"
       - "9001:9001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-      - ./certs:/mosquitto/certs:ro
-      - mosquitto-data:/mosquitto/data
-      - mosquitto-log:/mosquitto/log
+      - ./mosquitto.conf:/etc/mosquitto/mosquitto.conf:ro
+      - ./certs:/etc/mosquitto/certs:ro
+      - mosquitto-data:/var/lib/mosquitto
+      - mosquitto-log:/var/log/mosquitto
     environment:
       - TZ=UTC
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /mosquitto/certs/ca.crt -u healthcheck -P healthcheck -t healthcheck -E -i healthcheck-probe || exit 0"]
+      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /etc/mosquitto/certs/ca.crt -u healthcheck -P healthcheck -t healthcheck -E -i healthcheck-probe || exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
+
 
 volumes:
   mosquitto-data:
