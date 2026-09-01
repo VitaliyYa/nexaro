@@ -22,7 +22,7 @@ async def list_lock_pins(
     """List active and historical PIN codes for a lock (enforced via RLS)."""
     response = (
         db.table("property_pins")
-        .select("id, property_id, device_id, name, valid_from, valid_to, is_active, created_at")
+        .select("id, property_id, device_id, pin_name, valid_from, valid_to, is_active, created_at")
         .eq("property_id", str(property_id))
         .eq("device_id", device_id)
         .order("created_at", desc=True)
@@ -33,7 +33,7 @@ async def list_lock_pins(
             "id": r["id"],
             "property_id": r["property_id"],
             "device_id": r["device_id"],
-            "name": r["name"],
+            "name": r.get("pin_name") or r.get("name", ""),
             "valid_from": r["valid_from"],
             "valid_to": r["valid_to"],
             "is_active": r.get("is_active", True),
@@ -60,7 +60,7 @@ async def create_lock_pin(
     insert_payload = {
         "property_id": str(property_id),
         "device_id": device_id,
-        "name": body.name,
+        "pin_name": body.name,
         "pin_encrypted": encrypted_pin_val,
         "valid_from": body.valid_from.isoformat(),
         "valid_to": body.valid_to.isoformat(),
@@ -95,7 +95,7 @@ async def create_lock_pin(
         "id": pin_record["id"],
         "property_id": pin_record["property_id"],
         "device_id": pin_record["device_id"],
-        "name": pin_record["name"],
+        "name": pin_record.get("pin_name") or pin_record.get("name", ""),
         "valid_from": pin_record["valid_from"],
         "valid_to": pin_record["valid_to"],
         "is_active": pin_record["is_active"],
@@ -116,6 +116,9 @@ async def update_lock_pin(
     update_data = {k: v for k, v in body.model_dump(exclude_unset=True).items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields provided to update")
+
+    if "name" in update_data:
+        update_data["pin_name"] = update_data.pop("name")
 
     # Format datetimes if present
     if "valid_from" in update_data and hasattr(update_data["valid_from"], "isoformat"):
@@ -156,7 +159,7 @@ async def update_lock_pin(
         "id": r["id"],
         "property_id": r["property_id"],
         "device_id": r["device_id"],
-        "name": r["name"],
+        "name": r.get("pin_name") or r.get("name", ""),
         "valid_from": r["valid_from"],
         "valid_to": r["valid_to"],
         "is_active": r.get("is_active", True),
