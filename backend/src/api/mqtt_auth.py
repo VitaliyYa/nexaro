@@ -1,7 +1,8 @@
+import json
 import urllib.parse
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from supabase import Client
 
 from src.auth.supabase import get_supabase_admin_client
@@ -23,11 +24,11 @@ async def _parse_request_data(request: Request) -> dict[str, Any]:
     if not body_bytes:
         return {}
 
+    body_str = body_bytes.decode("utf-8", errors="ignore")
+
     # 1. Try JSON
     try:
-        import json
-
-        data = json.loads(body_bytes.decode("utf-8"))
+        data = json.loads(body_str)
         if isinstance(data, dict):
             return data
     except Exception:
@@ -35,27 +36,30 @@ async def _parse_request_data(request: Request) -> dict[str, Any]:
 
     # 2. Try URL-encoded query string
     try:
-        qs_data = urllib.parse.parse_qs(body_bytes.decode("utf-8"))
+        qs_data = urllib.parse.parse_qs(body_str)
         if qs_data:
             return {k: v[0] if len(v) == 1 else v for k, v in qs_data.items()}
-    except Exception:
-        pass
-
-    # 3. Try request.form() if available
-    try:
-        form = await request.form()
-        if form:
-            return dict(form)
     except Exception:
         pass
 
     return {}
 
 
-@router.post("/user", status_code=status.HTTP_200_OK)
+@router.post(
+    "/user",
+    status_code=status.HTTP_200_OK,
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": UserAuthRequest.model_json_schema(),
+                }
+            }
+        }
+    },
+)
 async def authenticate_mqtt_user(
     request: Request,
-    body: UserAuthRequest | None = Body(None),
     settings: Settings = Depends(get_settings),
     admin_db: Client = Depends(get_supabase_admin_client),
 ):
@@ -63,13 +67,9 @@ async def authenticate_mqtt_user(
     Mosquitto /user webhook for checking MQTT credentials.
     Returns 200 if credentials are valid, 401/403 otherwise.
     """
-    if body:
-        username = body.username
-        password = body.password
-    else:
-        data = await _parse_request_data(request)
-        username = data.get("username") or data.get("user") or ""
-        password = data.get("password") or data.get("pw") or ""
+    data = await _parse_request_data(request)
+    username = data.get("username") or data.get("user") or ""
+    password = data.get("password") or data.get("pw") or ""
 
     if not username or not password:
         raise HTTPException(
@@ -113,21 +113,29 @@ async def authenticate_mqtt_user(
     return {"status": "ok", "user": username, "property_id": record.get("property_id")}
 
 
-@router.post("/superuser", status_code=status.HTTP_200_OK)
+@router.post(
+    "/superuser",
+    status_code=status.HTTP_200_OK,
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": SuperuserAuthRequest.model_json_schema(),
+                }
+            }
+        }
+    },
+)
 async def authenticate_mqtt_superuser(
     request: Request,
-    body: SuperuserAuthRequest | None = Body(None),
     settings: Settings = Depends(get_settings),
 ):
     """
     Mosquitto /superuser webhook.
     Only the backend worker has superuser status across all tenant topics.
     """
-    if body:
-        username = body.username
-    else:
-        data = await _parse_request_data(request)
-        username = data.get("username") or data.get("user") or ""
+    data = await _parse_request_data(request)
+    username = data.get("username") or data.get("user") or ""
 
     if username == settings.MQTT_WORKER_USERNAME:
         return {"status": "ok", "superuser": True}
@@ -138,10 +146,21 @@ async def authenticate_mqtt_superuser(
     )
 
 
-@router.post("/acl", status_code=status.HTTP_200_OK)
+@router.post(
+    "/acl",
+    status_code=status.HTTP_200_OK,
+    openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": AclCheckRequest.model_json_schema(),
+                }
+            }
+        }
+    },
+)
 async def check_mqtt_acl(
     request: Request,
-    body: AclCheckRequest | None = Body(None),
     settings: Settings = Depends(get_settings),
     admin_db: Client = Depends(get_supabase_admin_client),
 ):
@@ -149,19 +168,14 @@ async def check_mqtt_acl(
     Mosquitto /acl webhook.
     Enforces multi-tenant isolation so Edge nodes only access their property namespace.
     """
-    if body:
-        username = body.username
-        topic = body.topic
-        acc = body.acc
-    else:
-        data = await _parse_request_data(request)
-        username = data.get("username") or data.get("user") or ""
-        topic = data.get("topic") or ""
-        raw_acc = data.get("acc", 1)
-        try:
-            acc = Acc(int(raw_acc))
-        except Exception:
-            acc = Acc.integer_1
+    data = await _parse_request_data(request)
+    username = data.get("username") or data.get("user") or ""
+    topic = data.get("topic") or ""
+    raw_acc = data.get("acc", 1)
+    try:
+        acc = Acc(int(raw_acc))
+    except Exception:
+        acc = Acc.integer_1
 
     # 1. Superuser backend worker can access any topic in properties/
     if username == settings.MQTT_WORKER_USERNAME:

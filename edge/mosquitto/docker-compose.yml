@@ -16,10 +16,11 @@ services:
     environment:
       - TZ=UTC
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /etc/mosquitto/certs/ca.crt -u healthcheck -P healthcheck -t healthcheck -E -i healthcheck-probe || exit 0"]
+      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /etc/mosquitto/certs/ca.crt -u backend_worker -P secret_backend_worker_pass -t healthcheck -E -i healthcheck-probe || exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
+
 
 
 volumes:
