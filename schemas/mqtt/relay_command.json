@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/mqtt/relay_command.json",
+  "title": "RelayCommandPayload",
+  "description": "Command payload sent to toggle or switch relay power.",
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "enum": ["ON", "OFF", "TOGGLE"]
+    },
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique command idempotency tracking ID"
+    }
+  },
+  "required": ["command", "request_id"],
+  "additionalProperties": false
+}

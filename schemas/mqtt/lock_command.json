@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/mqtt/lock_command.json",
+  "title": "LockCommandPayload",
+  "description": "Command payload sent from Cloud to Edge to operate a smart lock.",
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "enum": ["LOCK", "UNLOCK"]
+    },
+    "duration_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 300,
+      "description": "Optional auto-relock delay in seconds"
+    },
+    "requested_by": {
+      "type": "string",
+      "description": "User ID or system process initiating the command"
+    },
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique command idempotency tracking ID"
+    }
+  },
+  "required": ["command", "request_id"],
+  "additionalProperties": false
+}

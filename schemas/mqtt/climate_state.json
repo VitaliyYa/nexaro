@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/mqtt/climate_state.json",
+  "title": "ClimateStatePayload",
+  "description": "Reported physical state of climate control (HVAC / AC / Thermostat).",
+  "type": "object",
+  "properties": {
+    "current_temperature": {
+      "type": "number",
+      "description": "Current ambient temperature in Celsius"
+    },
+    "target_temperature": {
+      "type": "number",
+      "minimum": 10.0,
+      "maximum": 35.0,
+      "description": "Target setpoint temperature in Celsius"
+    },
+    "hvac_mode": {
+      "type": "string",
+      "enum": ["off", "cool", "heat", "fan_only", "auto", "dry"],
+      "description": "Current operational mode"
+    },
+    "fan_mode": {
+      "type": ["string", "null"],
+      "enum": ["auto", "low", "medium", "high", null],
+      "description": "Fan speed setting"
+    },
+    "is_powered": {
+      "type": "boolean",
+      "description": "Power state of the climate unit"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of status update"
+    }
+  },
+  "required": ["current_temperature", "target_temperature", "hvac_mode", "is_powered", "timestamp"],
+  "additionalProperties": false
+}
