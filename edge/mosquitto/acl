@@ -1,0 +1,10 @@
+# Auto-generated Mosquitto ACL Configuration for SmartRent
+# DO NOT EDIT DIRECTLY. Use manage_acl.py
+
+# Cloud Backend Service: backend_worker
+user backend_worker
+topic read properties/+/+/+/state
+topic read properties/+/+/+/event
+topic read properties/+/node/+/availability
+topic write properties/+/+/+/set
+

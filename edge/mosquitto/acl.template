@@ -1,0 +1,17 @@
+# SmartRent Mosquitto ACL Template
+# ================================
+
+# System: Backend Cloud Worker
+user backend_worker
+topic read properties/+/+/+/state
+topic read properties/+/+/+/event
+topic read properties/+/node/+/availability
+topic write properties/+/+/+/set
+
+# System: Edge Node Template (Repeat per property_id)
+# ----------------------------------------------------
+# user edge_<property_id>
+# topic write properties/<property_id>/+/+/state
+# topic write properties/<property_id>/+/+/event
+# topic write properties/<property_id>/node/+/availability
+# topic read properties/<property_id>/+/+/set
