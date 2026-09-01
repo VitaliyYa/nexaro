@@ -10,7 +10,6 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-
     # Environment
     ENVIRONMENT: str = "development"
     DEBUG: bool = True

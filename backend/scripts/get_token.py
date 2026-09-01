@@ -2,8 +2,10 @@
 """
 Helper script to create a confirmed test user and print a valid Supabase JWT access token for Swagger UI.
 """
-from src.config import get_settings
+
 from supabase import create_client
+
+from src.config import get_settings
 
 
 def main():
