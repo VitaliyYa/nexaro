@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/mqtt/climate_command.json",
+  "title": "ClimateCommandPayload",
+  "description": "Command payload sent to control climate / AC setpoints and modes.",
+  "type": "object",
+  "properties": {
+    "target_temperature": {
+      "type": "number",
+      "minimum": 10.0,
+      "maximum": 35.0,
+      "description": "Target setpoint temperature in Celsius"
+    },
+    "hvac_mode": {
+      "type": "string",
+      "enum": ["off", "cool", "heat", "fan_only", "auto", "dry"],
+      "description": "Desired operational mode"
+    },
+    "fan_mode": {
+      "type": "string",
+      "enum": ["auto", "low", "medium", "high"],
+      "description": "Desired fan speed"
+    },
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique command idempotency tracking ID"
+    }
+  },
+  "required": ["request_id"],
+  "additionalProperties": false
+}

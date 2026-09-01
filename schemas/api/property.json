@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/api/property.json",
+  "title": "PropertySchema",
+  "description": "Property entity managed in SmartRent SaaS.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "owner_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "address": {
+      "type": ["string", "null"]
+    },
+    "timezone": {
+      "type": "string",
+      "default": "UTC"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["id", "owner_id", "name", "created_at", "updated_at"],
+  "additionalProperties": false
+}

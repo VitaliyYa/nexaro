@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/mqtt/valve_event.json",
+  "title": "ValveEventPayload",
+  "description": "Event and state payload for water leak sensors and motorized water valves.",
+  "type": "object",
+  "properties": {
+    "leak_detected": {
+      "type": "boolean",
+      "description": "True if water leak sensor is currently triggered"
+    },
+    "valve_state": {
+      "type": "string",
+      "enum": ["OPEN", "CLOSED", "CLOSING", "OPENING", "UNKNOWN"],
+      "description": "Current mechanical state of the motorized water shutoff valve"
+    },
+    "sensor_id": {
+      "type": ["string", "null"],
+      "description": "Identifier of the specific leak sensor that triggered the event"
+    },
+    "auto_closed": {
+      "type": "boolean",
+      "description": "True if valve was closed autonomously by local HAOS automation"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of the event"
+    }
+  },
+  "required": ["leak_detected", "valve_state", "timestamp"],
+  "additionalProperties": false
+}

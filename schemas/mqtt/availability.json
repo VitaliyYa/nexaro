@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/mqtt/availability.json",
+  "title": "NodeAvailabilityPayload",
+  "description": "Availability heartbeat and Last Will and Testament (LWT) status for Edge nodes.",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["online", "offline"]
+    },
+    "node_id": {
+      "type": "string",
+      "description": "Identifier of the Edge node gateway"
+    },
+    "version": {
+      "type": "string",
+      "description": "Software or firmware version of the edge node"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of the status change"
+    }
+  },
+  "required": ["status", "node_id", "timestamp"],
+  "additionalProperties": false
+}

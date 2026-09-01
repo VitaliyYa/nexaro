@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/api/mqtt_auth.json",
+  "title": "MqttAuthWebhookSchema",
+  "description": "Schemas for Mosquitto mosquitto-go-auth HTTP webhook authentication and ACL verification.",
+  "type": "object",
+  "definitions": {
+    "UserAuthRequest": {
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "required": ["username", "password"],
+      "additionalProperties": false
+    },
+    "SuperuserAuthRequest": {
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" }
+      },
+      "required": ["username"],
+      "additionalProperties": false
+    },
+    "AclCheckRequest": {
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "topic": { "type": "string" },
+        "clientid": { "type": "string" },
+        "acc": {
+          "type": "integer",
+          "enum": [1, 2, 3, 4],
+          "description": "Access type: 1 = read/sub, 2 = write/pub, 3 = subscribe, 4 = read"
+        }
+      },
+      "required": ["username", "topic", "acc"],
+      "additionalProperties": false
+    }
+  }
+}

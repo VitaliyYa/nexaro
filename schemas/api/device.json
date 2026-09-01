@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartrent.io/schemas/api/device.json",
+  "title": "DeviceSchema",
+  "description": "Device entity connected to a property in SmartRent.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": ["lock", "relay", "valve", "climate", "sensor"]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "last_seen": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["id", "property_id", "device_type", "name", "is_active", "created_at", "updated_at"],
+  "additionalProperties": false
+}

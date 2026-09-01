@@ -1,0 +1,6 @@
+# Ignore generated keys, certificates, and runtime data
+certs/*.key
+certs/*.crt
+certs/*.srl
+data/
+log/
