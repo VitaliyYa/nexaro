@@ -24,7 +24,55 @@ def verify_supabase_jwt(
     Supports asymmetric JWKS verification (RS256/ES256), symmetric secret (HS256),
     or unverified fallback in development mode if no secret/JWKS configured.
     """
-    # 1. JWKS verification
+    try:
+        header = jwt.get_unverified_header(token)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Malformed JWT token",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
+
+    alg = header.get("alg", "HS256")
+
+    # 1. JWKS asymmetric verification (RS256 / ES256 / etc.)
+    if alg != "HS256" and settings.SUPABASE_JWKS_URL:
+        try:
+            jwks_client = get_jwks_client(settings.SUPABASE_JWKS_URL)
+            signing_key = jwks_client.get_signing_key_from_jwt(token)
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256", "ES256", "HS256"],
+                audience="authenticated",
+                options={"verify_aud": False},
+            )
+            return payload
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid JWT credentials (JWKS validation failed: {e})",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from e
+
+    # 2. Symmetric secret verification (HS256)
+    if settings.SUPABASE_JWT_SECRET:
+        try:
+            payload = jwt.decode(
+                token,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=[settings.SUPABASE_JWT_ALGORITHM, "HS256"],
+                options={"verify_aud": False},
+            )
+            return payload
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid JWT credentials ({e})",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from e
+
+    # Fallback to JWKS if available even for other algorithms
     if settings.SUPABASE_JWKS_URL:
         try:
             jwks_client = get_jwks_client(settings.SUPABASE_JWKS_URL)
@@ -44,24 +92,8 @@ def verify_supabase_jwt(
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
 
-    # 2. Symmetric secret verification
-    if settings.SUPABASE_JWT_SECRET:
-        try:
-            payload = jwt.decode(
-                token,
-                settings.SUPABASE_JWT_SECRET,
-                algorithms=[settings.SUPABASE_JWT_ALGORITHM],
-                options={"verify_aud": False},
-            )
-            return payload
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Invalid JWT credentials ({e})",
-                headers={"WWW-Authenticate": "Bearer"},
-            ) from e
-
     # 3. Development mode fallback without secret verification
+
     try:
         payload = jwt.decode(token, options={"verify_signature": False})
         return payload
