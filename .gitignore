@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.env.*
+!.env.example
+.venv/
+env/
+venv/
+ENV/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / Frontend
+node_modules/
+dist/
+.npm
+*.tsbuildinfo
+
+# Mosquitto runtime / certificates
+edge/mosquitto/certs/*.key
+edge/mosquitto/certs/*.crt
+edge/mosquitto/certs/*.srl
+edge/mosquitto/data/
+edge/mosquitto/log/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
