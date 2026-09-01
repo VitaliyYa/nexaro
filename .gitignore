@@ -24,7 +24,9 @@ dist/
 .npm
 *.tsbuildinfo
 
-# Mosquitto runtime / certificates
+# Mosquitto runtime / certificates / credentials
+edge/mosquitto/passwd
+edge/mosquitto/acl
 edge/mosquitto/certs/*.key
 edge/mosquitto/certs/*.crt
 edge/mosquitto/certs/*.srl

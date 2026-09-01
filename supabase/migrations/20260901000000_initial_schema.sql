@@ -69,7 +69,26 @@ CREATE INDEX IF NOT EXISTS idx_device_logs_property_created ON device_logs(prope
 CREATE INDEX IF NOT EXISTS idx_device_logs_device_created ON device_logs(property_id, device_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_device_logs_created_retention ON device_logs(created_at);
 
--- 6. Smart Locks Encrypted PIN Codes Table
+-- 6. MQTT Edge Node Credentials Table (Hashed passwords for Mosquitto Auth Webhook)
+CREATE TABLE IF NOT EXISTS mqtt_credentials (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    username VARCHAR(64) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_mqtt_credentials_property ON mqtt_credentials(property_id);
+CREATE INDEX IF NOT EXISTS idx_mqtt_credentials_username ON mqtt_credentials(username);
+
+CREATE TRIGGER trg_mqtt_credentials_updated_at
+BEFORE UPDATE ON mqtt_credentials
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- 7. Smart Locks Encrypted PIN Codes Table
 CREATE TABLE IF NOT EXISTS property_pins (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
@@ -90,7 +109,7 @@ BEFORE UPDATE ON property_pins
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
--- 7. Audit Logs Table (Physical Access & Security Operations)
+-- 8. Audit Logs Table (Physical Access & Security Operations)
 CREATE TABLE IF NOT EXISTS audit_logs (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -103,13 +122,14 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE INDEX IF NOT EXISTS idx_audit_logs_property_created ON audit_logs(property_id, created_at DESC);
 
 -- -----------------------------------------------------------------------------
--- 8. Row Level Security (RLS) Policies
+-- 9. Row Level Security (RLS) Policies
 -- -----------------------------------------------------------------------------
 
 -- Enable RLS on all tables
 ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE devices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE device_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mqtt_credentials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE property_pins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
@@ -196,6 +216,48 @@ WITH CHECK (
     )
 );
 
+-- MQTT Credentials Policies
+CREATE POLICY "Users can view own property mqtt credentials"
+ON mqtt_credentials FOR SELECT
+TO authenticated
+USING (
+    property_id IN (
+        SELECT id FROM properties WHERE owner_id = auth.uid()
+    )
+);
+
+CREATE POLICY "Users can insert own property mqtt credentials"
+ON mqtt_credentials FOR INSERT
+TO authenticated
+WITH CHECK (
+    property_id IN (
+        SELECT id FROM properties WHERE owner_id = auth.uid()
+    )
+);
+
+CREATE POLICY "Users can update own property mqtt credentials"
+ON mqtt_credentials FOR UPDATE
+TO authenticated
+USING (
+    property_id IN (
+        SELECT id FROM properties WHERE owner_id = auth.uid()
+    )
+)
+WITH CHECK (
+    property_id IN (
+        SELECT id FROM properties WHERE owner_id = auth.uid()
+    )
+);
+
+CREATE POLICY "Users can delete own property mqtt credentials"
+ON mqtt_credentials FOR DELETE
+TO authenticated
+USING (
+    property_id IN (
+        SELECT id FROM properties WHERE owner_id = auth.uid()
+    )
+);
+
 -- Property PINs Policies
 CREATE POLICY "Users can view own property pins"
 ON property_pins FOR SELECT
@@ -260,7 +322,7 @@ WITH CHECK (
 );
 
 -- -----------------------------------------------------------------------------
--- 9. pg_cron Scheduled Maintenance (90-Day Retention Policy)
+-- 10. pg_cron Scheduled Maintenance (90-Day Retention Policy)
 -- -----------------------------------------------------------------------------
 
 -- Daily cleanup at 03:00 UTC

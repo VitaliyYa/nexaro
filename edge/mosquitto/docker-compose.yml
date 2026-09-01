@@ -1,6 +1,6 @@
 services:
   mosquitto:
-    image: eclipse-mosquitto:2.0
+    image: iegomez/mosquitto-go-auth:latest
     container_name: smartrent-mosquitto
     restart: unless-stopped
     ports:
@@ -8,8 +8,6 @@ services:
       - "9001:9001"
     volumes:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-      - ./passwd:/mosquitto/config/passwd:ro
-      - ./acl:/mosquitto/config/acl:ro
       - ./certs:/mosquitto/certs:ro
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log
