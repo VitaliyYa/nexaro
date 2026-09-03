@@ -130,3 +130,18 @@ def test_mqtt_acl_superuser_allowed_all_properties(client):
         },
     )
     assert resp.status_code == 200
+
+
+def test_openapi_schema_has_no_broken_defs_references():
+    import json
+
+    from src.main import app
+
+    schema = app.openapi()
+    schema_str = json.dumps(schema)
+    assert "#/$defs" not in schema_str
+
+    acl_body = schema["paths"]["/api/v1/auth/mqtt/acl"]["post"]["requestBody"]["content"]
+    assert "application/json" in acl_body
+    assert "application/x-www-form-urlencoded" in acl_body
+    assert "$ref" not in json.dumps(acl_body)

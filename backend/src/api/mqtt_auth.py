@@ -3,6 +3,7 @@ import urllib.parse
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel
 from supabase import Client
 
 from src.auth.supabase import get_supabase_admin_client
@@ -16,6 +17,25 @@ from src.schemas.generated.api.mqtt_auth import (
 from src.services.mqtt_auth_service import is_topic_allowed_for_edge, verify_password_hash
 
 router = APIRouter(prefix="/auth/mqtt", tags=["MQTT Mosquitto Auth Webhooks"])
+
+
+def _get_inlined_model_schema(model: type[BaseModel]) -> dict[str, Any]:
+    """Generates an OpenAPI-compatible JSON schema with inlined definitions ($defs resolved)."""
+    schema = model.model_json_schema()
+    defs = schema.pop("$defs", {})
+
+    def _replace_refs(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            if "$ref" in obj and obj["$ref"].startswith("#/$defs/"):
+                def_name = obj["$ref"].removeprefix("#/$defs/")
+                if def_name in defs:
+                    return _replace_refs(defs[def_name])
+            return {k: _replace_refs(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [_replace_refs(item) for item in obj]
+        return obj
+
+    return _replace_refs(schema)
 
 
 async def _parse_request_data(request: Request) -> dict[str, Any]:
@@ -52,8 +72,11 @@ async def _parse_request_data(request: Request) -> dict[str, Any]:
         "requestBody": {
             "content": {
                 "application/json": {
-                    "schema": UserAuthRequest.model_json_schema(),
-                }
+                    "schema": _get_inlined_model_schema(UserAuthRequest),
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema": _get_inlined_model_schema(UserAuthRequest),
+                },
             }
         }
     },
@@ -120,8 +143,11 @@ async def authenticate_mqtt_user(
         "requestBody": {
             "content": {
                 "application/json": {
-                    "schema": SuperuserAuthRequest.model_json_schema(),
-                }
+                    "schema": _get_inlined_model_schema(SuperuserAuthRequest),
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema": _get_inlined_model_schema(SuperuserAuthRequest),
+                },
             }
         }
     },
@@ -153,8 +179,11 @@ async def authenticate_mqtt_superuser(
         "requestBody": {
             "content": {
                 "application/json": {
-                    "schema": AclCheckRequest.model_json_schema(),
-                }
+                    "schema": _get_inlined_model_schema(AclCheckRequest),
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema": _get_inlined_model_schema(AclCheckRequest),
+                },
             }
         }
     },
