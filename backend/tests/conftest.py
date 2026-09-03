@@ -172,11 +172,12 @@ def client(mock_db: MockSupabaseClient, mock_mqtt: MockMqttService, test_user: C
     app.dependency_overrides[get_supabase_admin_client] = lambda: mock_db
     app.dependency_overrides[get_mqtt_service] = lambda: mock_mqtt
     app.dependency_overrides[get_current_user] = lambda: test_user
+    base_settings = get_settings()
     app.dependency_overrides[get_settings] = lambda: Settings(
         ENVIRONMENT="test",
-        MQTT_WORKER_USERNAME="backend_worker",
-        MQTT_WORKER_PASSWORD="test_worker_pass",
-        PIN_ENCRYPTION_KEY="k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0=",
+        MQTT_WORKER_USERNAME=base_settings.MQTT_WORKER_USERNAME or "backend_worker",
+        MQTT_WORKER_PASSWORD=base_settings.MQTT_WORKER_PASSWORD or "test_worker_pass",
+        PIN_ENCRYPTION_KEY=base_settings.PIN_ENCRYPTION_KEY or "k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0=",
     )
 
     with TestClient(app) as test_client:

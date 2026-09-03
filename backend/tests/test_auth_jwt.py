@@ -16,7 +16,6 @@ def test_verify_supabase_jwt_valid():
     settings = Settings(
         SUPABASE_JWT_SECRET=secret,
         SUPABASE_JWT_ALGORITHM="HS256",
-        PIN_ENCRYPTION_KEY="k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0=",
     )
 
     payload = verify_supabase_jwt(token, settings)
@@ -31,7 +30,6 @@ def test_verify_supabase_jwt_invalid_secret():
     settings = Settings(
         SUPABASE_JWT_SECRET="secret_B_with_at_least_32_characters_for_hmac",
         SUPABASE_JWT_ALGORITHM="HS256",
-        PIN_ENCRYPTION_KEY="k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0=",
     )
 
     with pytest.raises(HTTPException) as exc_info:
@@ -42,7 +40,6 @@ def test_verify_supabase_jwt_invalid_secret():
 def test_verify_supabase_jwt_malformed():
     settings = Settings(
         SUPABASE_JWT_SECRET="secret_B",
-        PIN_ENCRYPTION_KEY="k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0=",
     )
     with pytest.raises(HTTPException) as exc_info:
         verify_supabase_jwt("not.a.valid.jwt.token", settings)

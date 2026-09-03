@@ -34,3 +34,14 @@
   - Эндпоинт отправки команд устройствам (`/properties/{property_id}/devices/{device_id}/command`) с QoS 1 и `retain: false`.
   - 100% покрытие юнит-тестами (26 тестов в Pytest).
 
+### Changed & Security
+- **Унификация переменных окружения (.env):**
+  - Удален избыточный дубликат `edge/mosquitto/.env`. Теперь все сервисы (Backend, Mosquitto Docker Compose) используют единый конфигурационный файл `/.env` в корне монорепозитория.
+  - Контейнер Mosquitto в `docker-compose.yml` получает учетные данные воркера напрямую через `env_file: ../../.env` без дублирования в блоке `environment`.
+- **Устранение захардкоженных секретов и ключей:**
+  - Очищены значения по умолчанию для `MQTT_WORKER_PASSWORD` и `PIN_ENCRYPTION_KEY` в `backend/src/config.py`.
+  - Удален захардкоженный дефолтный пароль `secret_backend_worker_pass` из `edge/mosquitto/docker-compose.yml`.
+  - Добавлена строгая валидация наличия `PIN_ENCRYPTION_KEY` в `pin_crypto.py`.
+  - Устранена передача статических паролей и ключей в `backend/tests/conftest.py`, `test_mqtt_auth.py` и `test_auth_jwt.py`; тесты теперь динамически подтягивают актуальные настройки.
+  - Добавлена поддержка настройки учетных данных тестового пользователя через `TEST_USER_PASSWORD` / `TEST_USER_EMAIL` в `backend/scripts/get_token.py` и шаблонах `.env.example`.
+

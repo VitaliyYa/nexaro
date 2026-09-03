@@ -9,6 +9,8 @@ from src.config import get_settings
 def _get_fernet_instance(key_str: str | None = None) -> Fernet:
     settings = get_settings()
     raw_key = key_str or settings.PIN_ENCRYPTION_KEY
+    if not raw_key:
+        raise ValueError("PIN_ENCRYPTION_KEY is not configured in settings or environment.")
     # If the key is not already a valid 32-byte url-safe base64 string, derive a valid 32-byte key
     try:
         decoded = base64.urlsafe_b64decode(raw_key.encode("utf-8"))

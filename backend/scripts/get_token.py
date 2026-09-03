@@ -3,6 +3,8 @@
 Helper script to create a confirmed test user and print a valid Supabase JWT access token for Swagger UI.
 """
 
+import os
+
 from supabase import create_client
 
 from src.config import get_settings
@@ -13,8 +15,8 @@ def main():
     admin_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SECRET_KEY)
     public_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_PUBLISHABLE_KEY)
 
-    email = "testowner@smartrent.io"
-    password = "TestPassword123!"
+    email = os.getenv("TEST_USER_EMAIL", "testowner@smartrent.io")
+    password = os.getenv("TEST_USER_PASSWORD", "TestPassword123!")
 
     # 1. Ensure test user exists and email is confirmed
     users = admin_client.auth.admin.list_users()

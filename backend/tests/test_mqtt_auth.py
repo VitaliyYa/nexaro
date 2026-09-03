@@ -4,11 +4,14 @@ from src.services.mqtt_auth_service import hash_password_pbkdf2
 
 
 def test_mqtt_user_auth_superuser(client):
+    from src.config import get_settings
+
+    settings = get_settings()
     response = client.post(
         "/api/v1/auth/mqtt/user",
         json={
-            "username": "backend_worker",
-            "password": "test_worker_pass",
+            "username": settings.MQTT_WORKER_USERNAME or "backend_worker",
+            "password": settings.MQTT_WORKER_PASSWORD or "test_worker_pass",
         },
     )
     assert response.status_code == 200

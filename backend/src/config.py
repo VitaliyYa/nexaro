@@ -31,12 +31,12 @@ class Settings(BaseSettings):
     MQTT_CLIENT_CERT_PATH: str | None = None
     MQTT_CLIENT_KEY_PATH: str | None = None
     MQTT_WORKER_USERNAME: str = "backend_worker"
-    MQTT_WORKER_PASSWORD: str = "secret_backend_worker_pass"
+    MQTT_WORKER_PASSWORD: str = ""
     MQTT_KEEPALIVE: int = 60
 
     # Security & Encryption
-    # 32-byte Fernet key (e.g. Fernet.generate_key().decode())
-    PIN_ENCRYPTION_KEY: str = "k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0="
+    # 32-byte Fernet key (loaded from .env or environment)
+    PIN_ENCRYPTION_KEY: str = ""
 
     # CORS
     CORS_ORIGINS: list[str] = ["*"]

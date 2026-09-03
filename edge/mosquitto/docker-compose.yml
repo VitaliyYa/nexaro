@@ -20,8 +20,6 @@ services:
         required: false
     environment:
       - TZ=UTC
-      - MQTT_WORKER_USERNAME=${MQTT_WORKER_USERNAME:-backend_worker}
-      - MQTT_WORKER_PASSWORD=${MQTT_WORKER_PASSWORD:-secret_backend_worker_pass}
     healthcheck:
       test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 8883 --cafile /etc/mosquitto/certs/ca.crt -u \"$${MQTT_WORKER_USERNAME}\" -P \"$${MQTT_WORKER_PASSWORD}\" -t healthcheck -E -i healthcheck-probe || exit 0"]
       interval: 30s
