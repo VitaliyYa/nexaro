@@ -26,15 +26,15 @@ wheels = [
 
 [[package]]
 name = "anyio"
-version = "4.14.2"
+version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "idna" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.15'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/61/cc/a381afa6efea9f496eff839d4a6a1aed3bfafc7b3ab4b0d1b243a12573dd/anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f", size = 260176, upload-time = "2026-07-12T20:29:07.082Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ea/9a/c15a60547004a3f3cea20296c934f827ddd7bdba225a2e7e9fcb5ec48c80/anyio-4.15.0.tar.gz", hash = "sha256:b5c620ed540725e2579c31b17bb995b3bf02c9281c9cace04c7d186380bab85e", size = 276504, upload-time = "2026-09-02T21:46:36.957Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/35/f2287558c17e29fafc8ef3daf819bb9834061cfa43bff8014f7df7f63bdc/anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494", size = 125813, upload-time = "2026-07-12T20:29:05.763Z" },
+    { url = "https://files.pythonhosted.org/packages/21/a6/2b21ce5ebe4d8938a247c9b0dbb7271566ae559b01795c83ea4bb2660ed7/anyio-4.15.0-py3-none-any.whl", hash = "sha256:7ecd9937369ffce8bba0b5ccb9b3a9507b101b0ed50256aecfbab27e6c2acb99", size = 131908, upload-time = "2026-09-02T21:46:35.485Z" },
 ]
 
 [[package]]
@@ -242,7 +242,7 @@ wheels = [
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.76.0"
+version = "0.76.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "argcomplete" },
@@ -254,9 +254,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5c/65/27983214b172cf5463209ef55b68f7bb180eaeb114fbca477f709e2ca721/datamodel_code_generator-0.76.0.tar.gz", hash = "sha256:782ad3d17ea53f3a2300347d4058e281ba749ff57821712464f88c1ce75876c8", size = 2184419, upload-time = "2026-08-29T02:04:09.432Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/94/fad95512b15f4fea6c39ba1205a237049c9a0d7fe3211e34c235cd150679/datamodel_code_generator-0.76.1.tar.gz", hash = "sha256:6f9e94caa5c82be0e0c6f2cf87024920aef0a979897b668734a99d25db289b20", size = 2223271, upload-time = "2026-09-02T08:49:32.606Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/72/801a441c9d3717c9fab3399a382ed2d146cc79df12b8ea45427ce26d55a3/datamodel_code_generator-0.76.0-py3-none-any.whl", hash = "sha256:cff9d19faa9072cfc19a04d11ac5e30d0e1a846bd1f843f05f37841941fe3e62", size = 643099, upload-time = "2026-08-29T02:04:07.519Z" },
+    { url = "https://files.pythonhosted.org/packages/19/14/c1c4d7e96cf7e06c6036e0967a33866fd6e97649fab1788dac415d378a89/datamodel_code_generator-0.76.1-py3-none-any.whl", hash = "sha256:9670c48ac432762f8e14641d769c37a9e1558e35dd0400727fcc1def47f6f374", size = 653802, upload-time = "2026-09-02T08:49:30.739Z" },
 ]
 
 [[package]]
@@ -666,11 +666,11 @@ wheels = [
 
 [[package]]
 name = "platformdirs"
-version = "4.11.6"
+version = "4.11.7"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8e/1d/6e762a6b060e662208951aefc5c39f6a96a272c4a10c0c1f7b6113fc3c09/platformdirs-4.11.6.tar.gz", hash = "sha256:1a4016e373f89f8ec458431fe0e0c5c4285858ac623f3e20efdfcbc0bd862941", size = 35131, upload-time = "2026-09-01T04:41:00.6Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/b7/802a56eca9f2fac455b8bab5375a2647b0f0e14a2cd63ef077de3c4a7658/platformdirs-4.11.7.tar.gz", hash = "sha256:4f41487eeeeeb07f3a6625e61d9bc0ae6809f92d3386dbd74392fbb76108104d", size = 35127, upload-time = "2026-09-01T13:35:10.502Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4e/d8/2784c6eabb991b5b7494ff9e9888c74a0a72ad613c3ec5adbfcecc0724c7/platformdirs-4.11.6-py3-none-any.whl", hash = "sha256:b22d992e863bc651c26b16242041c7979db6e3286e548f9a76cc91238fac599e", size = 23938, upload-time = "2026-09-01T04:40:58.977Z" },
+    { url = "https://files.pythonhosted.org/packages/27/6e/80993e10a0482f630cef528635789233224f36b1ffd11592aa15d13ff9ce/platformdirs-4.11.7-py3-none-any.whl", hash = "sha256:8a02cb259042c79d1cd0450facc2fe6dc9d303ae7901afbe33bf8ea0b188cef6", size = 23938, upload-time = "2026-09-01T13:35:09.02Z" },
 ]
 
 [[package]]
@@ -1128,25 +1128,25 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cryptography", specifier = ">=44.0.0" },
-    { name = "fastapi", specifier = ">=0.115.0" },
-    { name = "httpx", specifier = ">=0.28.0" },
+    { name = "cryptography", specifier = ">=50.0.1" },
+    { name = "fastapi", specifier = ">=0.141.1" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "paho-mqtt", specifier = ">=2.1.0" },
-    { name = "pydantic", specifier = ">=2.10.0" },
-    { name = "pydantic-settings", specifier = ">=2.6.0" },
+    { name = "pydantic", specifier = ">=2.13.5" },
+    { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.10.0" },
-    { name = "python-multipart", specifier = ">=0.0.18" },
-    { name = "supabase", specifier = ">=2.10.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
+    { name = "python-multipart", specifier = ">=0.0.32" },
+    { name = "supabase", specifier = ">=2.31.0" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.52.4" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "datamodel-code-generator", specifier = ">=0.26.0" },
-    { name = "pytest", specifier = ">=8.3.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "ruff", specifier = ">=0.8.0" },
+    { name = "datamodel-code-generator", specifier = ">=0.76.1" },
+    { name = "pytest", specifier = ">=9.1.1" },
+    { name = "pytest-asyncio", specifier = ">=1.4.0" },
+    { name = "pytest-mock", specifier = ">=3.15.1" },
+    { name = "ruff", specifier = ">=0.16.5" },
 ]
 
 [[package]]
