@@ -1,3 +1,4 @@
+import os
 import uuid
 from typing import Any
 
@@ -11,6 +12,15 @@ from src.auth.supabase import get_supabase_admin_client, get_supabase_client
 from src.config import Settings, get_settings
 from src.main import app
 from src.mqtt.client import get_mqtt_service
+
+# Ensure fallback test environment variables when running in CI without a .env file
+_init_settings = get_settings()
+if not _init_settings.PIN_ENCRYPTION_KEY:
+    os.environ["PIN_ENCRYPTION_KEY"] = "k5M7j0v9y9mE2q_u2bW2Zg3d1K4t6F8s0A2b4C6d8E0="
+    get_settings.cache_clear()
+if not _init_settings.MQTT_WORKER_PASSWORD:
+    os.environ["MQTT_WORKER_PASSWORD"] = "test_worker_pass"
+    get_settings.cache_clear()
 
 
 class MockPostgrestResponse:
