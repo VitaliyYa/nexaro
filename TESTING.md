@@ -11,6 +11,13 @@
 - [x] Тестирование шифрования PIN-кодов (AES/Fernet) и аудита операций в `audit_logs`.
 - [x] Тестирование Mosquitto go-auth HTTP вебхуков (`/user`, `/superuser`, `/acl`).
 - [x] Тестирование диспетчера команд устройств в MQTT (`/set` топики, QoS 1, retain: false).
+- [x] **Live API & Integration Tests (на работающем сервере и брокере):**
+  - Проверка работоспособности живого сервера и подключения к брокеру: `GET /health`.
+  - Проверка аутентификации пользователя Mosquitto: `POST /api/v1/auth/mqtt/user` (валидный пароль из `.env`, неверный пароль, form-urlencoded).
+  - Проверка прав суперпользователя: `POST /api/v1/auth/mqtt/superuser` (воркер — 200 OK, посторонний — 403 Forbidden).
+  - Проверка изоляции топиков: `POST /api/v1/auth/mqtt/acl` (воркеру разрешены `properties/+/+/+/set`, запрещены чужие префиксы; неизвестным узлам доступ запрещен).
+  - Запуск через Pytest: `uv run pytest -m integration`
+  - Запуск через CLI-скрипт: `uv run python scripts/test_live_api.py`
 
 
 ### Frontend (Playwright)

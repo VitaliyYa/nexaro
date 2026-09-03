@@ -56,3 +56,6 @@ ignore = ["B008"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "integration: live API and network integration tests",
+]
