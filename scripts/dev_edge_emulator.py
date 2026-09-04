@@ -9,9 +9,9 @@ import json
 import logging
 import os
 import sys
-import time
 import threading
-from dotenv import load_dotenv
+import time
+from pathlib import Path
 import paho.mqtt.client as mqtt
 
 logging.basicConfig(
@@ -20,7 +20,33 @@ logging.basicConfig(
 )
 logger = logging.getLogger("edge_emulator")
 
-load_dotenv()
+
+def load_env_file():
+    """Reads .env from current directory or project root without requiring third-party libraries."""
+    candidates = [
+        Path.cwd() / ".env",
+        Path(__file__).resolve().parent.parent / ".env",
+        Path(__file__).resolve().parent / ".env",
+    ]
+    for env_path in candidates:
+        if env_path.is_file():
+            logger.info("Loaded environment from %s", env_path)
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, _, v = line.partition("=")
+                            k = k.strip()
+                            v = v.strip().strip('"').strip("'")
+                            if k not in os.environ:
+                                os.environ[k] = v
+                break
+            except Exception as e:
+                logger.warning("Failed to read %s: %s", env_path, e)
+
+
+load_env_file()
 
 MQTT_HOST = os.getenv("MQTT_BROKER_HOST", "localhost")
 MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", "1883"))

@@ -45,3 +45,6 @@ frontend-lint: ## Run frontend linter
 
 codegen-types: ## Generate TypeScript interfaces from SSOT JSON Schemas
 	npm --prefix frontend run codegen:types
+
+emulator: ## Run local IoT edge device emulator
+	uv run --directory backend python ../scripts/dev_edge_emulator.py
