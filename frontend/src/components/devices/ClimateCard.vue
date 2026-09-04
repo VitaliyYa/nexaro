@@ -70,11 +70,11 @@ async function adjustTemperature(delta: number) {
 
       <div class="mt-4 flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40">
         <div>
-          <span class="text-xs text-slate-500 block">Current</span>
+          <span class="text-xs text-slate-500 block">{{ t('devices.current') }}</span>
           <span class="text-xl font-bold text-slate-800 dark:text-slate-100">{{ currentTemp }}°C</span>
         </div>
         <div class="text-right">
-          <span class="text-xs text-slate-500 block">Target</span>
+          <span class="text-xs text-slate-500 block">{{ t('devices.target') }}</span>
           <span class="text-xl font-bold text-indigo-600 dark:text-indigo-400">{{ targetTemp }}°C</span>
         </div>
       </div>

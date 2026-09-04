@@ -66,7 +66,7 @@ async function handleToggle() {
 
     <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
       <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
-        {{ isOn ? t('devices.turnOn') : t('devices.turnOff') }}
+        {{ isOn ? t('devices.on') : t('devices.off') }}
       </span>
       <Switch
         :checked="isOn"

@@ -76,7 +76,7 @@ async function handleToggleValve() {
 
     <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
       <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
-        {{ isOpen ? t('common.active') : t('common.inactive') }}
+        {{ isOpen ? t('devices.valveOpen') : t('devices.valveClosed') }}
       </span>
       <Button
         size="sm"
