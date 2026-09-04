@@ -1,4 +1,4 @@
-.PHONY: help dev dev-down mosquitto mosquitto-logs backend test lint format frontend frontend-install frontend-test frontend-lint codegen-types emulator
+.PHONY: help dev dev-down mosquitto mosquitto-logs backend test lint format frontend frontend-install frontend-test frontend-lint codegen-types emulator admin-user
 
 .DEFAULT_GOAL := help
 
@@ -48,3 +48,6 @@ codegen-types: ## Generate TypeScript interfaces from SSOT JSON Schemas
 
 emulator: ## Run local IoT edge device emulator
 	uv run --directory backend python ../scripts/dev_edge_emulator.py
+
+admin-user: ## Create or update SuperAdmin account in Supabase
+	uv run --directory backend python scripts/create_admin_user.py
