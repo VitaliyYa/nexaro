@@ -47,3 +47,14 @@ def test_logs_retrieval(client, mock_db, test_user):
     audit_resp = client.get(f"/api/v1/properties/{prop_id}/logs/audit")
     assert audit_resp.status_code == 200
     assert len(audit_resp.json()) == 1
+
+    # Query unified logs endpoint
+    unified_resp = client.get(f"/api/v1/properties/{prop_id}/logs?limit=50")
+    assert unified_resp.status_code == 200
+    logs = unified_resp.json()
+    assert len(logs) == 3
+    event_types = [log["event_type"] for log in logs]
+    assert "CONFIG_UPDATE" in event_types
+    assert "event" in event_types
+    assert "state" in event_types
+

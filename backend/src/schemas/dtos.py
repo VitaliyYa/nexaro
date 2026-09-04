@@ -74,3 +74,14 @@ class DeviceLogResponse(BaseModel):
     event_type: str
     payload: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
+
+
+class UnifiedLogResponse(BaseModel):
+    id: str | int
+    property_id: UUID
+    device_id: str | None = None
+    topic: str
+    event_type: str
+    payload: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+
