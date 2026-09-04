@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from src.schemas.generated.api.device import DeviceType
 
@@ -34,11 +34,25 @@ class DeviceUpdateRequest(BaseModel):
 
 
 class PinCreateRequest(BaseModel):
-    device_id: str = Field(..., min_length=1, max_length=64)
-    name: str = Field(..., min_length=1, max_length=100, description="Guest or staff label")
-    pin: str = Field(..., min_length=4, max_length=32, description="Plain text PIN code to be encrypted")
-    valid_from: datetime
-    valid_to: datetime
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    device_id: str | None = Field(None, max_length=64)
+    name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        validation_alias=AliasChoices("name", "pin_name"),
+        description="Guest or staff label",
+    )
+    pin: str = Field(
+        ...,
+        min_length=4,
+        max_length=32,
+        validation_alias=AliasChoices("pin", "pin_code"),
+        description="Plain text PIN code to be encrypted",
+    )
+    valid_from: datetime | None = Field(None, validation_alias=AliasChoices("valid_from", "validFrom"))
+    valid_to: datetime | None = Field(None, validation_alias=AliasChoices("valid_to", "validTo"))
 
 
 class PinUpdateRequest(BaseModel):
@@ -84,4 +98,3 @@ class UnifiedLogResponse(BaseModel):
     event_type: str
     payload: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
-

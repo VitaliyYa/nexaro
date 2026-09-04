@@ -57,4 +57,3 @@ def test_logs_retrieval(client, mock_db, test_user):
     assert "CONFIG_UPDATE" in event_types
     assert "event" in event_types
     assert "state" in event_types
-

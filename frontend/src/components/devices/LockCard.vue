@@ -18,7 +18,13 @@ interface Props {
 
 interface PinItem {
   id: string;
-  pin_name: string;
+  property_id?: string;
+  device_id?: string;
+  name?: string;
+  pin_name?: string;
+  valid_from: string;
+  valid_to: string;
+  is_active?: boolean;
   created_at: string;
 }
 
@@ -39,7 +45,57 @@ const pins = ref<PinItem[]>([]);
 const pinsLoading = ref(false);
 const newPinName = ref('');
 const newPinCode = ref('');
+const isPermanentPin = ref(false);
+const newValidFrom = ref('');
+const newValidTo = ref('');
 const creatingPin = ref(false);
+
+function initPinForm() {
+  newPinName.value = '';
+  newPinCode.value = '';
+  isPermanentPin.value = false;
+
+  const now = new Date();
+  now.setMinutes(0, 0, 0);
+  const fromIsoLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+  const checkout = new Date(now.getTime() + 3 * 24 * 3600 * 1000);
+  checkout.setHours(12, 0, 0, 0);
+  const toIsoLocal = new Date(checkout.getTime() - checkout.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+  newValidFrom.value = fromIsoLocal;
+  newValidTo.value = toIsoLocal;
+}
+
+function isPermanent(pin: PinItem): boolean {
+  if (!pin.valid_to) return true;
+  const yr = new Date(pin.valid_to).getFullYear();
+  return yr >= 2099;
+}
+
+function isExpired(pin: PinItem): boolean {
+  if (isPermanent(pin)) return false;
+  return new Date(pin.valid_to).getTime() < Date.now();
+}
+
+function formatValidity(pin: PinItem): string {
+  if (isPermanent(pin)) {
+    return t('devices.permanentBadge');
+  }
+  const from = new Date(pin.valid_from).toLocaleString([], {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const to = new Date(pin.valid_to).toLocaleString([], {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${from} – ${to}`;
+}
 
 async function handleToggleLock() {
   const nextAction = isLocked.value ? 'UNLOCK' : 'LOCK';
@@ -72,22 +128,35 @@ async function loadPins() {
 }
 
 async function createPin() {
-  if (!newPinName.value || !newPinCode.value) return;
+  if (!newPinName.value.trim() || !newPinCode.value.trim()) return;
+  if (!isPermanentPin.value && (!newValidFrom.value || !newValidTo.value)) {
+    showToast(t('common.error'), 'error');
+    return;
+  }
   creatingPin.value = true;
   try {
+    const validFromIso = newValidFrom.value
+      ? new Date(newValidFrom.value).toISOString()
+      : new Date().toISOString();
+    const validToIso = isPermanentPin.value
+      ? '2099-12-31T23:59:59.000Z'
+      : new Date(newValidTo.value).toISOString();
+
     await apiRequest(
       `/properties/${props.device.property_id}/locks/${props.device.id}/pins`,
       {
         method: 'POST',
         body: JSON.stringify({
-          pin_name: newPinName.value,
-          pin_code: newPinCode.value,
+          device_id: props.device.id,
+          name: newPinName.value.trim(),
+          pin: newPinCode.value.trim(),
+          valid_from: validFromIso,
+          valid_to: validToIso,
         }),
       }
     );
     showToast(t('common.success'), 'success');
-    newPinName.value = '';
-    newPinCode.value = '';
+    initPinForm();
     await loadPins();
   } catch (err: any) {
     showToast(err.message || t('common.error'), 'error');
@@ -110,6 +179,7 @@ async function deletePin(pinId: string) {
 }
 
 function openPinManager() {
+  initPinForm();
   isPinModalOpen.value = true;
   loadPins();
 }
@@ -175,12 +245,46 @@ function openPinManager() {
       <div class="space-y-4">
         <!-- Form to add new PIN -->
         <div class="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-3">
-          <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ t('devices.createPin') }}</h5>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Input v-model="newPinName" :placeholder="t('devices.pinName')" />
-            <Input v-model="newPinCode" type="password" :placeholder="t('devices.pinCode')" />
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ t('devices.createPin') }}</h5>
+            <label class="inline-flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="isPermanentPin"
+                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900"
+              />
+              <span>{{ t('devices.permanentPin') }}</span>
+            </label>
           </div>
-          <Button size="sm" class="w-full" :loading="creatingPin" @click="createPin">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Input v-model="newPinName" :placeholder="t('devices.pinName')" required />
+            <Input v-model="newPinCode" type="text" inputmode="numeric" pattern="[0-9]*" :placeholder="t('devices.pinCode')" required />
+          </div>
+
+          <!-- Date & Time Range (hidden if permanent) -->
+          <div v-if="!isPermanentPin" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">{{ t('devices.validFrom') }}</label>
+              <input
+                v-model="newValidFrom"
+                type="datetime-local"
+                class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">{{ t('devices.validTo') }}</label>
+              <input
+                v-model="newValidTo"
+                type="datetime-local"
+                class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                required
+              />
+            </div>
+          </div>
+
+          <Button size="sm" class="w-full mt-2" :loading="creatingPin" @click="createPin">
             {{ t('common.add') }}
           </Button>
         </div>
@@ -191,22 +295,29 @@ function openPinManager() {
             {{ t('common.loading') }}
           </div>
           <div v-else-if="pins.length === 0" class="text-center py-4 text-xs text-slate-400">
-            {{ t('devices.noDevices') }}
+            {{ t('devices.noPins') }}
           </div>
           <div
             v-for="pin in pins"
             :key="pin.id"
             class="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
           >
-            <div>
-              <div class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ pin.pin_name }}</div>
-              <div class="text-xs text-slate-400">
-                {{ new Date(pin.created_at).toLocaleDateString() }}
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  {{ pin.name || pin.pin_name }}
+                </span>
+                <Badge :variant="isPermanent(pin) ? 'neutral' : (isExpired(pin) ? 'danger' : 'success')">
+                  {{ isPermanent(pin) ? t('devices.permanentBadge') : (isExpired(pin) ? t('devices.expiredBadge') : t('devices.activeBadge')) }}
+                </Badge>
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                {{ formatValidity(pin) }}
               </div>
             </div>
             <button
               @click="deletePin(pin.id)"
-              class="p-1.5 text-slate-400 hover:text-rose-500 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+              class="p-1.5 text-slate-400 hover:text-rose-500 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
             >
               <Trash2 class="h-4 w-4" />
             </button>

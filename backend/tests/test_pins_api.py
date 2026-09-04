@@ -54,3 +54,19 @@ def test_lock_pins_encryption_and_audit_trail(client, mock_db, test_user):
     del_resp = client.delete(f"/api/v1/properties/{prop_id}/locks/{lock_id}/pins/{pin_id}")
     assert del_resp.status_code == 204
     assert len(mock_db.table("audit_logs").store["audit_logs"]) == 3
+
+
+def test_permanent_pin_creation_and_defaults(client, mock_db, test_user):
+    prop_id = str(uuid.uuid4())
+    lock_id = "lock_main_entrance"
+
+    # Create permanent PIN (no valid_to, using alias pin_name and pin_code)
+    payload = {
+        "pin_name": "Property Owner (Master)",
+        "pin_code": "888999",
+    }
+    resp = client.post(f"/api/v1/properties/{prop_id}/locks/{lock_id}/pins", json=payload)
+    assert resp.status_code == 201
+    created = resp.json()
+    assert created["name"] == "Property Owner (Master)"
+    assert "2099" in created["valid_to"]

@@ -74,6 +74,13 @@
     "createPin": "Create New PIN",
     "pinName": "Guest / Name",
     "pinCode": "PIN Code (4-8 digits)",
+    "validFrom": "Valid From",
+    "validTo": "Valid To",
+    "permanentPin": "Permanent (Owner / Staff)",
+    "permanentBadge": "Permanent",
+    "activeBadge": "Active",
+    "expiredBadge": "Expired",
+    "noPins": "No PIN codes created yet.",
     "noDevices": "No devices connected to this property.",
     "timeoutError": "Device did not respond in time (timeout 10s)",
     "commandSent": "Command dispatched to device"
