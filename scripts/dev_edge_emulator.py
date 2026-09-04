@@ -81,23 +81,22 @@ def handle_device_command(client: mqtt.Client, topic: str, payload_str: str):
 
     state_payload = {}
     if device_type == "relay":
-        # Raw string or dict
-        val = data.get("state", data) if isinstance(data, dict) else str(data).strip("\"'")
-        state_payload = {"state": val.upper()}
+        val = data.get("command", data.get("state", data)) if isinstance(data, dict) else str(data).strip("\"'")
+        state_payload = {"state": str(val).upper()}
     elif device_type == "lock":
-        action = data.get("action", "").lower() if isinstance(data, dict) else str(data).lower()
-        if action == "unlock":
+        action = (data.get("command") or data.get("action", "")).lower() if isinstance(data, dict) else str(data).lower()
+        if action in ("unlock", "unlocked"):
             state_payload = {"state": "unlocked", "lock_state": "unlocked", "battery": 95}
         else:
             state_payload = {"state": "locked", "lock_state": "locked", "battery": 95}
     elif device_type == "valve":
-        action = data.get("action", "").lower() if isinstance(data, dict) else str(data).lower()
-        state_payload = {"state": "closed" if action == "close" else "open", "leak_detected": False}
+        action = (data.get("command") or data.get("action", "")).lower() if isinstance(data, dict) else str(data).lower()
+        state_payload = {"state": "closed" if action in ("close", "closed") else "open", "leak_detected": False}
     elif device_type == "climate":
         state_payload = {
             "current_temperature": 21.5,
             "target_temperature": data.get("target_temperature", 22.0) if isinstance(data, dict) else 22.0,
-            "mode": data.get("mode", "cool") if isinstance(data, dict) else "cool",
+            "mode": data.get("hvac_mode", data.get("mode", "cool")) if isinstance(data, dict) else "cool",
             "fan_mode": "auto",
         }
     else:

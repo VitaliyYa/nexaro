@@ -24,12 +24,12 @@ const isOpen = computed(() => settings.value.state !== 'closed');
 const isLeakDetected = computed(() => !!settings.value.leak_detected);
 
 async function handleToggleValve() {
-  const nextAction = isOpen.value ? 'close' : 'open';
+  const nextAction = isOpen.value ? 'CLOSE' : 'OPEN';
   try {
     await devicesStore.sendCommand(
       props.device.property_id,
       props.device.id,
-      { action: nextAction },
+      nextAction,
       () => {
         showToast(t('devices.timeoutError'), 'error');
       }

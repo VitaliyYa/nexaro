@@ -42,12 +42,12 @@ const newPinCode = ref('');
 const creatingPin = ref(false);
 
 async function handleToggleLock() {
-  const nextAction = isLocked.value ? 'unlock' : 'lock';
+  const nextAction = isLocked.value ? 'UNLOCK' : 'LOCK';
   try {
     await devicesStore.sendCommand(
       props.device.property_id,
       props.device.id,
-      { action: nextAction },
+      nextAction,
       () => {
         showToast(t('devices.timeoutError'), 'error');
       }

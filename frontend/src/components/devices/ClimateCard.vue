@@ -31,7 +31,9 @@ async function adjustTemperature(delta: number) {
       props.device.property_id,
       props.device.id,
       {
+        command: 'SET_TEMPERATURE',
         target_temperature: newTarget,
+        hvac_mode: mode.value,
         mode: mode.value,
       },
       () => {

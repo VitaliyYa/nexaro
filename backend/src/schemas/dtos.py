@@ -50,7 +50,7 @@ class PinUpdateRequest(BaseModel):
 
 class DeviceCommandRequest(BaseModel):
     model_config = ConfigDict(extra="allow")
-    command: str = Field(..., description="Action to perform, e.g. ON, OFF, LOCK, UNLOCK")
+    command: str | dict[str, Any] = Field(..., description="Action to perform, e.g. ON, OFF, LOCK, UNLOCK or dict")
     duration_seconds: int | None = Field(None, description="Optional delay or duration")
     target_temperature: float | None = None
     hvac_mode: str | None = None

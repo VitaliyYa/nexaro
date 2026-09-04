@@ -136,11 +136,19 @@ export const useDevicesStore = defineStore('devices', () => {
 
     // 4. Send command via FastAPI Backend REST API
     try {
+      const payloadBody =
+        typeof commandPayload === 'string'
+          ? { command: commandPayload }
+          : typeof commandPayload === 'object' && commandPayload !== null
+          ? {
+              command: commandPayload.command || commandPayload.action || 'CUSTOM',
+              ...commandPayload,
+            }
+          : { command: String(commandPayload) };
+
       await apiRequest(`/properties/${propertyId}/devices/${deviceId}/command`, {
         method: 'POST',
-        body: JSON.stringify({
-          command: commandPayload,
-        }),
+        body: JSON.stringify(payloadBody),
       });
     } catch (err: any) {
       // Revert pending state immediately if HTTP command dispatch failed
