@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -57,13 +58,16 @@ async def create_lock_pin(
     """
     encrypted_pin_val = encrypt_pin(body.pin)
 
+    valid_from_val = body.valid_from or datetime.now(UTC)
+    valid_to_val = body.valid_to or datetime(2099, 12, 31, 23, 59, 59, tzinfo=UTC)
+
     insert_payload = {
         "property_id": str(property_id),
         "device_id": device_id,
         "pin_name": body.name,
         "pin_encrypted": encrypted_pin_val,
-        "valid_from": body.valid_from.isoformat(),
-        "valid_to": body.valid_to.isoformat(),
+        "valid_from": valid_from_val.isoformat(),
+        "valid_to": valid_to_val.isoformat(),
         "is_active": True,
     }
 
@@ -85,8 +89,9 @@ async def create_lock_pin(
             "pin_id": pin_record["id"],
             "device_id": device_id,
             "pin_name": body.name,
-            "valid_from": body.valid_from.isoformat(),
-            "valid_to": body.valid_to.isoformat(),
+            "valid_from": valid_from_val.isoformat(),
+            "valid_to": valid_to_val.isoformat(),
+            "is_permanent": valid_to_val.year >= 2099,
         },
     }
     db.table("audit_logs").insert(audit_entry).execute()

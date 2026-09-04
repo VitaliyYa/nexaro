@@ -51,13 +51,35 @@ async def send_device_command(
     request_id = uuid.uuid4()
 
     # 2. Build and validate payload based on device_type
+    raw_cmd = body.command
+    cmd_str = ""
+    target_temperature = body.target_temperature
+    hvac_mode = body.hvac_mode
+    fan_mode = body.fan_mode
+    duration_seconds = body.duration_seconds
+
+    if isinstance(raw_cmd, dict):
+        cmd_str = str(raw_cmd.get("action") or raw_cmd.get("command") or "").upper()
+        if target_temperature is None and "target_temperature" in raw_cmd:
+            target_temperature = float(raw_cmd["target_temperature"])
+        if hvac_mode is None and "hvac_mode" in raw_cmd:
+            hvac_mode = raw_cmd["hvac_mode"]
+        elif hvac_mode is None and "mode" in raw_cmd:
+            hvac_mode = raw_cmd["mode"]
+        if fan_mode is None and "fan_mode" in raw_cmd:
+            fan_mode = raw_cmd["fan_mode"]
+        if duration_seconds is None and "duration_seconds" in raw_cmd:
+            duration_seconds = int(raw_cmd["duration_seconds"])
+    else:
+        cmd_str = str(raw_cmd).upper()
+
     if device_type == "relay":
         try:
-            cmd_enum = RelayCommandEnum(body.command.upper())
+            cmd_enum = RelayCommandEnum(cmd_str)
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Invalid relay command '{body.command}'. Must be ON, OFF, or TOGGLE.",
+                detail=f"Invalid relay command '{cmd_str}'. Must be ON, OFF, or TOGGLE.",
             ) from None
         payload_obj = RelayCommandPayload(
             command=cmd_enum,
@@ -65,29 +87,30 @@ async def send_device_command(
         )
     elif device_type == "lock":
         try:
-            cmd_enum = LockCommandEnum(body.command.upper())
+            cmd_enum = LockCommandEnum(cmd_str)
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Invalid lock command '{body.command}'. Must be LOCK or UNLOCK.",
+                detail=f"Invalid lock command '{cmd_str}'. Must be LOCK or UNLOCK.",
             ) from None
         payload_obj = LockCommandPayload(
             command=cmd_enum,
-            duration_seconds=body.duration_seconds,
+            duration_seconds=duration_seconds,
             requested_by=str(current_user.id),
             request_id=request_id,
         )
     elif device_type == "climate":
         payload_obj = ClimateCommandPayload(
             request_id=request_id,
-            target_temperature=body.target_temperature,
-            hvac_mode=body.hvac_mode,
-            fan_mode=body.fan_mode,
+            target_temperature=target_temperature,
+            hvac_mode=hvac_mode,
+            fan_mode=fan_mode,
         )
     else:
-        # Generic command structure
+        # Generic command structure (e.g. valve, sensor)
         payload_obj = {
-            "command": body.command,
+            "command": cmd_str or "TRIGGER",
+            "action": cmd_str.lower() if cmd_str else "trigger",
             "request_id": str(request_id),
             "requested_by": str(current_user.id),
         }
@@ -103,7 +126,7 @@ async def send_device_command(
         audit_entry = {
             "user_id": str(current_user.id),
             "property_id": str(property_id),
-            "action": f"LOCK_COMMAND_{body.command.upper()}",
+            "action": f"LOCK_COMMAND_{cmd_str}",
             "details": {
                 "device_id": device_id,
                 "request_id": str(request_id),
