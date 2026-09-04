@@ -119,6 +119,26 @@ def main():
     if MQTT_USER:
         client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
 
+    mqtt_tls_enabled = os.getenv("MQTT_TLS_ENABLED", "true").lower() in ("true", "1", "yes")
+    if mqtt_tls_enabled or MQTT_PORT == 8883:
+        import ssl
+        tls_context = ssl.create_default_context()
+        ca_path = os.getenv("MQTT_CA_CERT_PATH")
+        if not ca_path:
+            dev_ca = Path(__file__).resolve().parent.parent / "edge" / "mosquitto" / "certs" / "ca.crt"
+            if dev_ca.exists():
+                ca_path = str(dev_ca)
+
+        if ca_path and Path(ca_path).exists():
+            tls_context.load_verify_locations(cafile=ca_path)
+
+        tls_context.check_hostname = False
+        if not ca_path or not Path(ca_path).exists():
+            tls_context.verify_mode = ssl.CERT_NONE
+
+        client.tls_set_context(tls_context)
+        logger.info("Configured TLS context for MQTT connection on port %s", MQTT_PORT)
+
     client.on_connect = on_connect
     client.on_message = on_message
 
