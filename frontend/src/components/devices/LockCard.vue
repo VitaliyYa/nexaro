@@ -10,6 +10,7 @@ import Badge from '@/components/ui/Badge.vue';
 import Modal from '@/components/ui/Modal.vue';
 import Input from '@/components/ui/Input.vue';
 import { Lock, Unlock, KeyRound, Battery, Trash2 } from 'lucide-vue-next';
+import { cn } from '@/lib/utils';
 import type { DeviceSchema } from '@/types/generated';
 
 interface Props {
@@ -45,14 +46,61 @@ const pins = ref<PinItem[]>([]);
 const pinsLoading = ref(false);
 const newPinName = ref('');
 const newPinCode = ref('');
+const nameTouched = ref(false);
+const codeTouched = ref(false);
 const isPermanentPin = ref(false);
 const newValidFrom = ref('');
 const newValidTo = ref('');
 const creatingPin = ref(false);
 
+const pinCodeError = computed(() => {
+  if (!codeTouched.value && !newPinCode.value) return '';
+  const val = newPinCode.value.trim();
+  if (!val) return t('devices.pinCodeLengthError');
+  if (!/^\d+$/.test(val)) {
+    return t('devices.pinCodeDigitsOnlyError');
+  }
+  if (val.length < 4 || val.length > 8) {
+    return t('devices.pinCodeLengthError');
+  }
+  return '';
+});
+
+const pinNameError = computed(() => {
+  if (!nameTouched.value && !newPinName.value) return '';
+  if (!newPinName.value.trim()) {
+    return t('devices.pinNameError');
+  }
+  return '';
+});
+
+const pinDatesError = computed(() => {
+  if (isPermanentPin.value) return '';
+  if (!newValidFrom.value || !newValidTo.value) {
+    return t('devices.pinDatesRequiredError');
+  }
+  if (new Date(newValidTo.value).getTime() <= new Date(newValidFrom.value).getTime()) {
+    return t('devices.pinDatesOrderError');
+  }
+  return '';
+});
+
+const isFormValid = computed(() => {
+  const isNameValid = newPinName.value.trim().length > 0;
+  const isCodeValid = /^\d{4,8}$/.test(newPinCode.value.trim());
+  if (!isNameValid || !isCodeValid) return false;
+  if (!isPermanentPin.value) {
+    if (!newValidFrom.value || !newValidTo.value) return false;
+    if (new Date(newValidTo.value).getTime() <= new Date(newValidFrom.value).getTime()) return false;
+  }
+  return true;
+});
+
 function initPinForm() {
   newPinName.value = '';
   newPinCode.value = '';
+  nameTouched.value = false;
+  codeTouched.value = false;
   isPermanentPin.value = false;
 
   const now = new Date();
@@ -128,11 +176,10 @@ async function loadPins() {
 }
 
 async function createPin() {
-  if (!newPinName.value.trim() || !newPinCode.value.trim()) return;
-  if (!isPermanentPin.value && (!newValidFrom.value || !newValidTo.value)) {
-    showToast(t('common.error'), 'error');
-    return;
-  }
+  nameTouched.value = true;
+  codeTouched.value = true;
+  if (!isFormValid.value) return;
+
   creatingPin.value = true;
   try {
     const validFromIso = newValidFrom.value
@@ -257,34 +304,65 @@ function openPinManager() {
             </label>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Input v-model="newPinName" :placeholder="t('devices.pinName')" required />
-            <Input v-model="newPinCode" type="text" inputmode="numeric" pattern="[0-9]*" :placeholder="t('devices.pinCode')" required />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input
+              v-model="newPinName"
+              :placeholder="t('devices.pinName')"
+              :error="pinNameError"
+              required
+              @blur="nameTouched = true"
+            />
+            <Input
+              v-model="newPinCode"
+              type="text"
+              inputmode="numeric"
+              maxlength="8"
+              :placeholder="t('devices.pinCode')"
+              :error="pinCodeError"
+              required
+              @blur="codeTouched = true"
+            />
           </div>
 
           <!-- Date & Time Range (hidden if permanent) -->
-          <div v-if="!isPermanentPin" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-            <div>
-              <label class="block text-xs font-medium text-slate-500 mb-1">{{ t('devices.validFrom') }}</label>
-              <input
-                v-model="newValidFrom"
-                type="datetime-local"
-                class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                required
-              />
+          <div v-if="!isPermanentPin" class="space-y-1 pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">
+                  {{ t('devices.validFrom') }} <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  v-model="newValidFrom"
+                  type="datetime-local"
+                  class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">
+                  {{ t('devices.validTo') }} <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  v-model="newValidTo"
+                  type="datetime-local"
+                  :class="cn(
+                    'w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                    pinDatesError && 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
+                  )"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-500 mb-1">{{ t('devices.validTo') }}</label>
-              <input
-                v-model="newValidTo"
-                type="datetime-local"
-                class="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                required
-              />
-            </div>
+            <p v-if="pinDatesError" class="text-xs text-rose-500 pt-0.5">{{ pinDatesError }}</p>
           </div>
 
-          <Button size="sm" class="w-full mt-2" :loading="creatingPin" @click="createPin">
+          <Button
+            size="sm"
+            class="w-full mt-2"
+            :disabled="!isFormValid || creatingPin"
+            :loading="creatingPin"
+            @click="createPin"
+          >
             {{ t('common.add') }}
           </Button>
         </div>

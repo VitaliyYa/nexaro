@@ -82,6 +82,11 @@
     "expiredBadge": "Expired",
     "noPins": "No PIN codes created yet.",
     "noDevices": "No devices connected to this property.",
+    "pinCodeLengthError": "PIN code must be 4 to 8 digits.",
+    "pinCodeDigitsOnlyError": "Only numeric digits (0-9) are allowed.",
+    "pinNameError": "Name is required.",
+    "pinDatesOrderError": "End date must be after start date.",
+    "pinDatesRequiredError": "Please specify both start and end dates.",
     "timeoutError": "Device did not respond in time (timeout 10s)",
     "commandSent": "Command dispatched to device"
   },
