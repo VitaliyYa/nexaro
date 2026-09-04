@@ -55,6 +55,8 @@
     "climate": "Air Conditioning & Climate",
     "unlock": "Unlock",
     "lock": "Lock",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
     "turnOn": "Turn ON",
     "turnOff": "Turn OFF",
     "closeValve": "Shut Off Water",

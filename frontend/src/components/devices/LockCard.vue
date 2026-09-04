@@ -136,7 +136,7 @@ function openPinManager() {
             {{ battery }}%
           </span>
           <Badge :variant="isLocked ? 'success' : 'warning'">
-            {{ isLocked ? t('devices.lock') : t('devices.unlock') }}
+            {{ isLocked ? t('devices.locked') : t('devices.unlocked') }}
           </Badge>
         </div>
       </div>
