@@ -30,3 +30,18 @@ lint: ## Run Ruff linter and format check
 format: ## Auto-format code and apply safe fixes with Ruff
 	uv run --directory backend ruff format .
 	uv run --directory backend ruff check --fix .
+
+frontend: ## Run Frontend Vite development server
+	npm --prefix frontend run dev
+
+frontend-install: ## Install frontend dependencies
+	npm --prefix frontend install
+
+frontend-test: ## Run frontend unit tests
+	npm --prefix frontend run test:unit
+
+frontend-lint: ## Run frontend linter
+	npm --prefix frontend run lint
+
+codegen-types: ## Generate TypeScript interfaces from SSOT JSON Schemas
+	npm --prefix frontend run codegen:types
