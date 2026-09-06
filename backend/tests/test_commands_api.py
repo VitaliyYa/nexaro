@@ -93,3 +93,29 @@ def test_send_command_nonexistent_device(client):
         json={"command": "ON"},
     )
     assert cmd_resp.status_code == 404
+
+
+def test_send_lock_command_dict_action(client, mock_db, mock_mqtt, test_user):
+    prop_id = str(uuid.uuid4())
+    lock_id = "door_lock_dict"
+
+    mock_db.table("devices").insert(
+        {
+            "id": lock_id,
+            "property_id": prop_id,
+            "device_type": "lock",
+            "name": "Dict Lock",
+            "is_active": True,
+        }
+    ).execute()
+
+    cmd_resp = client.post(
+        f"/api/v1/properties/{prop_id}/devices/{lock_id}/command",
+        json={"command": {"action": "unlock"}},
+    )
+    assert cmd_resp.status_code == 200
+    res = cmd_resp.json()
+    assert res["status"] == "published"
+    assert res["topic"] == f"properties/{prop_id}/lock/{lock_id}/set"
+    published = mock_mqtt.published_messages[-1]
+    assert published["payload"]["command"] == "UNLOCK"
