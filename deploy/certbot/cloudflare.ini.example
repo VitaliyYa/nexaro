@@ -1,0 +1,15 @@
+# Cloudflare API Token for Certbot DNS Challenge
+# ================================================
+# Create a Cloudflare API Token with the following permissions:
+#   - Zone > DNS > Edit
+#   - Zone Resources: Include > Specific zone > your-domain.com
+#
+# Generate at: https://dash.cloudflare.com/profile/api-tokens
+#
+# Copy this file to cloudflare.ini and replace with your real token:
+#   cp cloudflare.ini.example cloudflare.ini
+#   chmod 600 cloudflare.ini
+#
+# NEVER commit cloudflare.ini to the repository!
+
+dns_cloudflare_api_token = your_cloudflare_api_token_here

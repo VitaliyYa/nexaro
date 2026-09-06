@@ -37,6 +37,7 @@ venv.bak/
 *.pem
 *.key
 *.crt
+cloudflare.ini
 
 # Pytest & Coverage
 .pytest_cache/
