@@ -25,6 +25,10 @@ scripts/
 .vscode/
 .idea/
 
-# Documentation
-*.md
+# Documentation (keep README.md — required by hatchling build)
+AGENTS.md
+CHANGELOG.md
+DECISIONS.md
+IMPLEMENTATION_PLAN.md
+TESTING.md
 LICENSE

@@ -13,7 +13,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 # Copy dependency files first for Docker layer caching
-COPY pyproject.toml uv.lock* ./
+# README.md is required by hatchling build backend during metadata resolution
+COPY pyproject.toml uv.lock* README.md ./
 
 # Install production dependencies only (no dev group) into .venv
 RUN uv sync --no-dev --frozen --no-editable
