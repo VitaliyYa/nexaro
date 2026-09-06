@@ -1,0 +1,29 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Build output (generated inside container)
+dist/
+
+# Tests (not needed in production image)
+tests/
+*.test.ts
+*.spec.ts
+vitest.config.*
+playwright.config.*
+
+# Git
+.git/
+.gitignore
+
+# Environment files (passed as build args)
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+*.md
+LICENSE

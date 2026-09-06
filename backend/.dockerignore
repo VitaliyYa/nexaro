@@ -1,0 +1,30 @@
+# Python / uv artifacts
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Tests and dev tools (not needed in production image)
+tests/
+scripts/
+.pytest_cache/
+.ruff_cache/
+
+# Git
+.git/
+.gitignore
+
+# Environment files (secrets injected via env vars)
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+*.md
+LICENSE
