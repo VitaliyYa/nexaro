@@ -6,6 +6,14 @@
 ## [Unreleased]
 
 ### Added
+- **Продакшен-инфраструктура и CI/CD:**
+  - Dockerfile для Backend (multi-stage: uv builder → python:3.14-slim, non-root user, healthcheck, 1 worker).
+  - Dockerfile для Frontend (multi-stage: node:24-alpine build с SSOT-кодогенерацией → nginx:1-alpine с SPA-роутингом).
+  - `docker-compose.prod.yml`: оркестрация всех сервисов (backend, mosquitto go-auth, frontend, nginx reverse-proxy, certbot DNS-challenge) в общей Docker-сети.
+  - Nginx reverse-proxy конфигурация: HTTPS-терминация (Let's Encrypt), маршрутизация `/` → SPA, `/api/` → FastAPI.
+  - Mosquitto продакшен-конфигурация: вебхуки аутентификации → `backend:8000` (Docker DNS), TLS с Let's Encrypt сертификатами.
+  - CI/CD пайплайн (GitHub Actions): автоматическая сборка Docker-образов → GHCR, деплой на VPS по SSH с генерацией `.env` из GitHub Secrets.
+  - Документация деплоя (`deploy/README.md`): первоначальная настройка VPS, GitHub Secrets, подключение HAOS, диагностика.
 - **Frontend SPA & PWA (Vue 3, Vite, Tailwind CSS, TypeScript):**
   - Инициализация веб-приложения с Pinia и Vue Router 4.
   - Автоматическая кодогенерация TypeScript интерфейсов из каталога SSOT JSON-схем через `json-schema-to-typescript`.

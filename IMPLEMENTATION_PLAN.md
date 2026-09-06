@@ -38,5 +38,14 @@
 
 ## Стадия 5: Тестирование и Запуск
 - [ ] Проведение E2E тестов.
-- [ ] Развертывание тестового Edge-узла (HAOS + реальное оборудование).
+- [x] Контейнеризация Backend: `backend/Dockerfile` (multi-stage, uv, python:3.14-slim, непривилегированный пользователь, healthcheck).
+- [x] Контейнеризация Frontend: `frontend/Dockerfile` (multi-stage, node:24-alpine build с codegen → nginx:1-alpine с SPA-роутингом).
+- [x] Продакшен-оркестрация: `docker-compose.prod.yml` (backend, mosquitto go-auth, frontend, nginx reverse-proxy, certbot DNS-challenge).
+- [x] Продакшен-конфигурации: `deploy/nginx/nginx.conf` (HTTPS, SPA + /api/ reverse proxy), `deploy/mosquitto/mosquitto.prod.conf` (вебхуки → backend:8000 по Docker DNS).
+- [x] CI/CD Pipeline: расширение GitHub Actions — сборка Docker-образов → GHCR, автоматический деплой на VPS по SSH после пуша в `main`.
+- [x] Документация деплоя: `deploy/README.md` (первоначальная настройка VPS, GitHub Secrets, подключение HAOS, диагностика).
+- [ ] Первоначальная настройка VPS: файрвол, swap, Docker, SSH-ключ для CD, сертификаты Let's Encrypt (ручной шаг).
+- [ ] Настройка GitHub Secrets и первый запуск CD-пайплайна.
+- [ ] Создание MQTT-учётных данных для HAOS в таблице `mqtt_credentials` (Supabase Studio).
+- [ ] Переподключение HAOS к продакшен-брокеру (mosquitto-go-auth) и проверка сквозного пути: UI → API → MQTT → HAOS → state → UI.
 - [ ] Альфа-тестирование системы с реальным пользователем.
